@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.15</version>
+		<version>3.1.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.malli</groupId>
@@ -15,10 +15,14 @@
 	<description>{{ project_description }}</description>
 	<properties>
 		<java.version>17</java.version>
-		<docker.image.prefix>fusoacp.azurecr.io</docker.image.prefix>
-        <container.image>azul/zulu-openjdk-alpine:17</container.image>
+		<docker.image.prefix>registry.hub.docker.com</docker.image.prefix>
+        <container.image>openjdk:17-alpine</container.image>
 		<springdoc-openapi-ui>1.7.0</springdoc-openapi-ui>
 		<jib-maven-plugin.version>3.3.0</jib-maven-plugin.version>
+		<!--Sonarcloud properties for maven command-->
+		<!--<sonar.organization>mallikarjunareddyn</sonar.organization>
+		<sonar.projectKey>MallikarjunaReddyN_demo-service</sonar.projectKey>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>-->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -61,6 +65,14 @@
 		</dependency>
 	</dependencies>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>Demo Service</name>
+			<url>https://maven.pkg.github.com/MallikarjunaReddyN/{{ project_slug }}</url>
+		</repository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -88,35 +100,48 @@
 						<image>${container.image}</image>
 					</from>
 					<to>
-						<image>${docker.image.prefix}/${project.artifactId}</image>
-						<tags>
-							<tag>${git.commit.id}</tag>
-						</tags>
+						<image>${docker.image.prefix}/mallireddy1998/${project.artifactId}</image>
 					</to>
 				</configuration>
+			</plugin>
+			<plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-checkstyle-plugin</artifactId>
+            	<version>3.0.0</version>
+            	<configuration>
+                	<configLocation>${basedir}/src/main/resources/checkstyle/checkstyle.xml</configLocation>
+            	</configuration>
+				<executions>
+        			<execution>
+						<id>validate</id>
+						<phase>validate</phase>
+            			<goals>
+                			<goal>check</goal>
+            			</goals>
+       			 	</execution>
+    			</executions>
+        	</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.8</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<!-- attached to Maven test phase -->
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<finalName>{{ project_slug }}</finalName>
 	</build>
-	<reporting>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>3.0.0</version>
-            <configuration>
-                <configLocation>${basedir}/src/main/resources/checkstyle/checkstyle.xml</configLocation>
-            </configuration>
-			<executions>
-        		<execution>
-					<id>validate</id>
-					<phase>validate</phase>
-            		<goals>
-                		<goal>check</goal>
-            		</goals>
-       			 </execution>
-    		</executions>
-        </plugin>
-    </plugins>
-	</reporting>
 </project>
